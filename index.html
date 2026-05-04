@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de Patologías</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Contenedor del fondo con difuminado (blur) -->
+    <div id="background-container" class="bg-entrada">
+        <div class="blur-overlay"></div>
+    </div>
+
+    <!-- Contenedor principal de la aplicación -->
+    <main id="app">
+        
+        <!-- PANTALLA 1: INICIO -->
+        <section id="screen-welcome" class="screen active">
+            <div class="content-center">
+                <h1 class="title-main">Bienvenido al Museo de Anatomopatología</h1>
+                <p class="subtitle">En la actualidad, la tecnología digital ha transformado la manera en que aprendemos
+                    las ciencias de la salud, permitiendo experiencias mas dinámicas e interactivas.
+                    Este museo de anatomopatología virtual nace como una propuesta innovadora que integra
+                    conocimiento científico con recurosos visuales.
+                </p>
+                <button id="btn-enter" class="btn-primary">Entrar al museo</button>
+            </div>
+        </section>
+
+        <!-- PANTALLA 2: SALA PRINCIPAL -->
+        <section id="screen-hall" class="screen hidden">
+            <div class="content-center">
+                <h2 class="title-main">Sala del Museo</h2>
+                <p class="subtitle">Selecciona la sección que deseas visitar</p>
+                <div class="buttons-container">
+                    <button class="btn-secondary" onclick="app.showList('3D')">Órganos 3D</button>
+                    <button class="btn-secondary" onclick="app.showList('2D')">Órganos 2D</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 3: LISTADO DE PATOLOGÍAS -->
+        <section id="screen-list" class="screen hidden">
+            <header class="top-bar">
+                <button class="btn-back" onclick="app.showScreen('screen-hall')">← Volver a la Sala</button>
+                <h2 id="list-title" class="title-section">Listado de Patologías</h2>
+            </header>
+            <div class="container overflow-y">
+                <div id="pathology-grid" class="grid-cards">
+                    <!-- Las tarjetas se generan dinámicamente con JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 4: DETALLE DE LA PATOLOGÍA -->
+        <section id="screen-detail" class="screen hidden">
+            <header class="top-bar">
+                <button class="btn-back" onclick="app.showScreen('screen-list')">← Volver al Listado</button>
+                <h2 id="detail-title" class="title-section">Nombre de la Patología</h2>
+            </header>
+            <div class="container overflow-y wrapper-detail">
+                <div class="info-card">
+                    <div class="info-section">
+                        <h3>Definición</h3>
+                        <p id="detail-definition" class="editable-placeholder"></p>
+                    </div>
+                    <div class="info-section">
+                        <h3>¿Por qué se produce? (Causa)</h3>
+                        <p id="detail-cause" class="editable-placeholder"></p>
+                    </div>
+                    <div class="info-section">
+                        <h3>Características Principales</h3>
+                        <p id="detail-characteristics" class="editable-placeholder"></p>
+                    </div>
+                    
+                    <div class="action-container">
+                        <button id="btn-view-model" class="btn-primary btn-large">Ver Modelo</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA 5: VISUALIZACIÓN DEL MODELO -->
+        <section id="screen-model-view" class="screen hidden">
+            <header class="top-bar">
+                <button class="btn-back" onclick="app.showScreen('screen-detail')">← Volver a Información</button>
+                <h2 id="model-view-title" class="title-section">Modelo de la Patología</h2>
+            </header>
+            <div class="container model-layout">
+                <!-- Columna Izquierda: Visualizador 2D/3D -->
+                <div class="viewer-container">
+                    <div id="viewer-2d" class="hidden">
+                        <img id="image-2d" src="" alt="Modelo 2D" />
+                    </div>
+                    <div id="viewer-3d" class="hidden">
+                        <!-- Aquí va el iframe del visor 3D embebido -->
+                        <iframe id="iframe-3d" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; xr-spatial-tracking"></iframe>
+                    </div>
+                    <a id="model-external-link" class="btn-secondary model-link hidden" target="_blank" rel="noopener">Abrir modelo 3D en otra pestaña</a>
+                </div>
+                
+                <!-- Columna Derecha: Información Macro/Micro -->
+                <div class="model-info-sidebar">
+                    <div class="info-section highlight">
+                        <h3>Análisis Macroscópico</h3>
+                        <p id="detail-macro" class="editable-placeholder"></p>
+                    </div>
+                    <div class="info-section highlight">
+                        <h3>Análisis Microscópico</h3>
+                        <p id="detail-micro" class="editable-placeholder"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
