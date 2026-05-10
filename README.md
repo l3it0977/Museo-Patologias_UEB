@@ -10,4 +10,6 @@
 - Abre index.html en tu navegador.
 
 ## Creditos
-- [Completar]
+- [Al poderoso equipo de desarrollo:
+    --Leonardo Daniel Vargas Calderon (Desarrollador Principal)
+    ]

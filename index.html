@@ -35,8 +35,8 @@
                 <h2 class="title-main">Sala del Museo</h2>
                 <p class="subtitle">Selecciona la sección que deseas visitar</p>
                 <div class="buttons-container">
-                    <button class="btn-secondary" onclick="app.showList('3D')">Órganos 3D</button>
-                    <button class="btn-secondary" onclick="app.showList('2D')">Órganos 2D</button>
+                    <button class="btn-secondary" onclick="museo.mostrarListado('3D')">Órganos 3D</button>
+                    <button class="btn-secondary" onclick="museo.mostrarListado('2D')">Órganos 2D</button>
                 </div>
             </div>
         </section>
@@ -44,7 +44,7 @@
         <!-- PANTALLA 3: LISTADO DE PATOLOGÍAS -->
         <section id="screen-list" class="screen hidden">
             <header class="top-bar">
-                <button class="btn-back" onclick="app.showScreen('screen-hall')">← Volver a la Sala</button>
+                <button class="btn-back" onclick="museo.mostrarPantalla('screen-hall')">← Volver a la Sala</button>
                 <h2 id="list-title" class="title-section">Listado de Patologías</h2>
             </header>
             <div class="container overflow-y">
@@ -57,7 +57,7 @@
         <!-- PANTALLA 4: DETALLE DE LA PATOLOGÍA -->
         <section id="screen-detail" class="screen hidden">
             <header class="top-bar">
-                <button class="btn-back" onclick="app.showScreen('screen-list')">← Volver al Listado</button>
+                <button class="btn-back" onclick="museo.mostrarPantalla('screen-list')">← Volver al Listado</button>
                 <h2 id="detail-title" class="title-section">Nombre de la Patología</h2>
             </header>
             <div class="container overflow-y wrapper-detail">
@@ -85,7 +85,7 @@
         <!-- PANTALLA 5: VISUALIZACIÓN DEL MODELO -->
         <section id="screen-model-view" class="screen hidden scrollable">
             <header class="top-bar">
-                <button class="btn-back" onclick="app.showScreen('screen-detail')">← Volver a Información</button>
+                <button class="btn-back" onclick="museo.mostrarPantalla('screen-detail')">← Volver a Información</button>
                 <h2 id="model-view-title" class="title-section">Modelo de la Patología</h2>
             </header>
             <div class="container model-layout">
@@ -95,8 +95,9 @@
                         <img id="image-2d" src="" alt="Modelo 2D" />
                     </div>
                     <div id="viewer-3d" class="hidden">
+                        <div id="visor-3d-local" class="visor-3d-local hidden"></div>
                         <!-- Aquí va el iframe del visor 3D embebido -->
-                        <iframe id="iframe-3d" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen; xr-spatial-tracking"></iframe>
+                        <iframe id="iframe-3d" src="" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking"></iframe>
                     </div>
                     <a id="model-external-link" class="btn-secondary model-link hidden" target="_blank" rel="noopener">Abrir modelo 3D en otra pestaña</a>
                 </div>

@@ -1,130 +1,336 @@
-const app = {
-    currentPathology: null,
+const visor3d = (() => {
+    let THREE = null;
+    let OrbitControls = null;
+    let GLTFLoader = null;
+    let DRACOLoader = null;
+    let cargandoDependencias = null;
+    let contenedor3d = null;
+    let escena = null;
+    let camara = null;
+    let renderizador = null;
+    let controlesOrbitales = null;
+    let cargadorGltf = null;
+    let cargadorDraco = null;
+    let modeloActual = null;
+    let renderActivo = false;
 
-    init() {
-        document.getElementById('btn-enter').addEventListener('click', () => {
-            this.showScreen('screen-hall');
-            const bgContainer = document.getElementById('background-container');
-            bgContainer.classList.remove('bg-entrada');
-            bgContainer.classList.add('bg-sala');
+    // Carga las dependencias locales de Three.js bajo demanda.
+    function cargarDependencias() {
+        if (THREE && OrbitControls && GLTFLoader && DRACOLoader) return Promise.resolve();
+        if (cargandoDependencias) return cargandoDependencias;
+
+        cargandoDependencias = Promise.all([
+            import('./three/three.module.js'),
+            import('./three/OrbitControls.js'),
+            import('./three/GLTFLoader.js'),
+            import('./three/DRACOLoader.js')
+        ]).then(([threeMod, orbitMod, gltfMod, dracoMod]) => {
+            THREE = threeMod;
+            OrbitControls = orbitMod.OrbitControls;
+            GLTFLoader = gltfMod.GLTFLoader;
+            DRACOLoader = dracoMod.DRACOLoader;
+        }).finally(() => {
+            cargandoDependencias = null;
         });
-    },
 
-    showScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(screen => {
-            if (screen.id !== screenId) {
-                screen.classList.remove('active');
-                setTimeout(() => screen.classList.add('hidden'), 500);
+        return cargandoDependencias;
+    }
+
+    // Inicializa el visor 3D local y sus dependencias.
+    function iniciar(idContenedor) {
+        if (renderizador) return;
+        contenedor3d = document.getElementById(idContenedor);
+        if (!contenedor3d || !THREE) return;
+
+        escena = new THREE.Scene();
+
+        camara = new THREE.PerspectiveCamera(
+            45,
+            contenedor3d.clientWidth / contenedor3d.clientHeight,
+            0.1,
+            1000
+        );
+        camara.position.set(0, 0.8, 2.2);
+
+        renderizador = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderizador.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        renderizador.setSize(contenedor3d.clientWidth, contenedor3d.clientHeight);
+        renderizador.outputColorSpace = THREE.SRGBColorSpace;
+        renderizador.setClearColor(0x000000, 0);
+
+        contenedor3d.innerHTML = '';
+        contenedor3d.appendChild(renderizador.domElement);
+
+        controlesOrbitales = new OrbitControls(camara, renderizador.domElement);
+        controlesOrbitales.enableDamping = true;
+        controlesOrbitales.dampingFactor = 0.06;
+        controlesOrbitales.minDistance = 0.6;
+
+        const luzAmbiente = new THREE.AmbientLight(0xffffff, 0.9);
+        const luzDireccional = new THREE.DirectionalLight(0xffffff, 0.8);
+        luzDireccional.position.set(3, 4, 2);
+        escena.add(luzAmbiente, luzDireccional);
+
+        // Habilita soporte para modelos GLTF/GLB comprimidos con Draco.
+        cargadorDraco = new DRACOLoader();
+        cargadorDraco.setDecoderPath('./js/draco/');
+        cargadorDraco.setDecoderConfig({ type: 'js' });
+        cargadorGltf = new GLTFLoader();
+        cargadorGltf.setDRACOLoader(cargadorDraco);
+
+        window.addEventListener('resize', ajustarTamano);
+        iniciarRender();
+    }
+
+    // Ajusta el renderizado al tamano del contenedor.
+    function ajustarTamano() {
+        if (!contenedor3d || !renderizador || !camara) return;
+        const ancho = contenedor3d.clientWidth;
+        const alto = contenedor3d.clientHeight;
+        renderizador.setSize(ancho, alto);
+        camara.aspect = ancho / alto;
+        camara.updateProjectionMatrix();
+    }
+
+    // Centra y encuadra el modelo para una vista inicial limpia.
+    function encuadrarModelo(objeto) {
+        const caja = new THREE.Box3().setFromObject(objeto);
+        const centro = new THREE.Vector3();
+        const tamano = new THREE.Vector3();
+
+        caja.getCenter(centro);
+        caja.getSize(tamano);
+        objeto.position.sub(centro);
+
+        const maximo = Math.max(tamano.x, tamano.y, tamano.z) || 1;
+        const distancia = maximo / (2 * Math.tan(THREE.MathUtils.degToRad(camara.fov * 0.5)));
+
+        camara.position.set(0, Math.max(0.4, maximo * 0.35), distancia * 1.4);
+        camara.near = Math.max(0.01, distancia / 100);
+        camara.far = Math.max(50, distancia * 100);
+        camara.updateProjectionMatrix();
+
+        controlesOrbitales.target.set(0, 0, 0);
+        controlesOrbitales.update();
+    }
+
+    // Libera recursos del modelo anterior para evitar fugas de memoria.
+    function limpiarModelo() {
+        if (!modeloActual || !escena) return;
+        escena.remove(modeloActual);
+
+        modeloActual.traverse((nodo) => {
+            if (nodo.geometry) nodo.geometry.dispose();
+            if (nodo.material) {
+                if (Array.isArray(nodo.material)) {
+                    nodo.material.forEach((material) => material.dispose());
+                } else {
+                    nodo.material.dispose();
+                }
             }
         });
 
-        const target = document.getElementById(screenId);
-        target.classList.remove('hidden');
-        setTimeout(() => target.classList.add('active'), 50);
+        modeloActual = null;
+    }
+
+    // Mantiene el renderizado activo con un bucle ligero.
+    function iniciarRender() {
+        if (renderActivo) return;
+        renderActivo = true;
+
+        const renderizar = () => {
+            if (!renderizador || !escena || !camara) return;
+            controlesOrbitales.update();
+            renderizador.render(escena, camara);
+            requestAnimationFrame(renderizar);
+        };
+
+        requestAnimationFrame(renderizar);
+    }
+
+    // Carga un modelo GLTF/GLB local y resuelve cuando termina.
+    async function cargarModelo(urlModelo) {
+        if (!urlModelo) throw new Error('Modelo 3D no definido.');
+
+        await cargarDependencias();
+        iniciar('visor-3d-local');
+        if (!cargadorGltf) throw new Error('Visor 3D no disponible.');
+
+        limpiarModelo();
+
+        return new Promise((resolve, reject) => {
+            cargadorGltf.load(
+                encodeURI(urlModelo),
+                (gltf) => {
+                    modeloActual = gltf.scene;
+                    escena.add(modeloActual);
+                    encuadrarModelo(modeloActual);
+                    resolve();
+                },
+                undefined,
+                (error) => reject(error)
+            );
+        });
+    }
+
+    return {
+        iniciar,
+        cargarModelo,
+        limpiarModelo
+    };
+})();
+
+const museo = {
+    patologiaActual: null,
+
+    // Inicializa eventos y la transicion inicial del museo.
+    iniciar() {
+        document.getElementById('btn-enter').addEventListener('click', () => {
+            this.mostrarPantalla('screen-hall');
+            const contenedorFondo = document.getElementById('background-container');
+            contenedorFondo.classList.remove('bg-entrada');
+            contenedorFondo.classList.add('bg-sala');
+        });
     },
 
-    showList(type) {
-        document.getElementById('list-title').innerText = `Catálogo de Órganos ${type}`;
-        const grid = document.getElementById('pathology-grid');
-        grid.innerHTML = ''; 
+    // Cambia la pantalla activa con transicion suave.
+    mostrarPantalla(idPantalla) {
+        document.querySelectorAll('.screen').forEach((pantalla) => {
+            if (pantalla.id !== idPantalla) {
+                pantalla.classList.remove('active');
+                setTimeout(() => pantalla.classList.add('hidden'), 500);
+            }
+        });
 
-        const items = pathologiesData.filter(p => p.type === type);
+        const destino = document.getElementById(idPantalla);
+        destino.classList.remove('hidden');
+        setTimeout(() => destino.classList.add('active'), 50);
+    },
+
+    // Genera el listado de patologias segun el tipo seleccionado.
+    mostrarListado(tipo) {
+        document.getElementById('list-title').innerText = `Catálogo de Órganos ${tipo}`;
+        const grilla = document.getElementById('pathology-grid');
+        grilla.innerHTML = '';
+
+        const items = (window.datosPatologias || []).filter((patologia) => patologia.tipo === tipo);
 
         if (items.length === 0) {
-            grid.innerHTML = '<p>No hay patologías registradas en esta categoría aún.</p>';
+            grilla.innerHTML = '<p>No hay patologías registradas en esta categoría aún.</p>';
         } else {
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => this.showDetail(item.id);
-                card.innerHTML = `
-                    <span class="tag">Modelo ${item.type}</span>
-                    <h3>${item.name}</h3>
-                    <p style="font-size: 0.9em; opacity: 0.8; margin-top: 10px;">${item.shortDesc}</p>
+            items.forEach((patologia) => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card';
+                tarjeta.onclick = () => this.mostrarDetalle(patologia.identificador);
+                tarjeta.innerHTML = `
+                    <span class="tag">Modelo ${patologia.tipo}</span>
+                    <h3>${patologia.nombre}</h3>
+                    <p style="font-size: 0.9em; opacity: 0.8; margin-top: 10px;">${patologia.descripcionCorta}</p>
                 `;
-                grid.appendChild(card);
+                grilla.appendChild(tarjeta);
             });
         }
 
-        this.showScreen('screen-list');
+        this.mostrarPantalla('screen-list');
     },
 
-    showDetail(id) {
-        const pathology = pathologiesData.find(p => p.id === id);
-        if (!pathology) return;
+    // Muestra la ficha detallada de una patologia.
+    mostrarDetalle(identificador) {
+        const patologia = (window.datosPatologias || []).find((item) => item.identificador === identificador);
+        if (!patologia) return;
 
-        this.currentPathology = pathology;
+        this.patologiaActual = patologia;
 
-        document.getElementById('detail-title').innerText = pathology.name;
-        document.getElementById('detail-definition').innerText = pathology.definition;
-        document.getElementById('detail-cause').innerText = pathology.cause;
-        document.getElementById('detail-characteristics').innerText = pathology.characteristics;
-        
-        const btnModel = document.getElementById('btn-view-model');
-        btnModel.innerText = `Ver modelo en ${pathology.type}`;
-        btnModel.onclick = () => this.showModel();
+        document.getElementById('detail-title').innerText = patologia.nombre;
+        document.getElementById('detail-definition').innerText = patologia.definicion;
+        document.getElementById('detail-cause').innerText = patologia.causa;
+        document.getElementById('detail-characteristics').innerText = patologia.caracteristicas;
 
-        this.showScreen('screen-detail');
+        const botonModelo = document.getElementById('btn-view-model');
+        botonModelo.innerText = `Ver modelo en ${patologia.tipo}`;
+        botonModelo.onclick = () => this.mostrarModelo();
+
+        this.mostrarPantalla('screen-detail');
     },
 
-    showModel() {
-        const item = this.currentPathology;
-        if (!item) return;
+    // Muestra el modelo 2D o 3D segun la patologia seleccionada.
+    mostrarModelo() {
+        const patologia = this.patologiaActual;
+        if (!patologia) return;
 
-        document.getElementById('model-view-title').innerText = item.name;
-        document.getElementById('detail-macro').innerText = item.macro;
-        document.getElementById('detail-micro').innerText = item.micro;
+        document.getElementById('model-view-title').innerText = patologia.nombre;
+        document.getElementById('detail-macro').innerText = patologia.macro;
+        document.getElementById('detail-micro').innerText = patologia.micro;
 
-        const viewer2D = document.getElementById('viewer-2d');
-        const viewer3D = document.getElementById('viewer-3d');
-        const modelLink = document.getElementById('model-external-link');
-        
-        viewer2D.classList.add('hidden');
-        viewer3D.classList.add('hidden');
+        const visor2d = document.getElementById('viewer-2d');
+        const contenedor3d = document.getElementById('viewer-3d');
+        const enlaceModelo = document.getElementById('model-external-link');
+        const iframe3d = document.getElementById('iframe-3d');
+        const visorLocal3d = document.getElementById('visor-3d-local');
 
-        if (item.type === '2D') {
-            viewer2D.classList.remove('hidden');
-            const img = document.getElementById('image-2d');
-            img.src = item.mediaUrl ? encodeURI(item.mediaUrl) : '';
-            modelLink.classList.add('hidden');
-            modelLink.removeAttribute('href');
-        } else if (item.type === '3D') {
-            viewer3D.classList.remove('hidden');
-            const iframe = document.getElementById('iframe-3d');
-            const embedUrl = this.getPolycamEmbedUrl(item.mediaUrl);
-            iframe.src = embedUrl || '';
-            if (item.mediaUrl) {
-                modelLink.href = item.mediaUrl;
-                modelLink.classList.remove('hidden');
-            } else {
-                modelLink.classList.add('hidden');
-                modelLink.removeAttribute('href');
+        visor2d.classList.add('hidden');
+        contenedor3d.classList.add('hidden');
+        visorLocal3d.classList.add('hidden');
+        iframe3d.classList.add('hidden');
+        iframe3d.src = '';
+
+        if (patologia.tipo === '2D') {
+            visor2d.classList.remove('hidden');
+            const imagen = document.getElementById('image-2d');
+            imagen.src = patologia.imagen2d ? encodeURI(patologia.imagen2d) : '';
+            enlaceModelo.classList.add('hidden');
+            enlaceModelo.removeAttribute('href');
+        } else if (patologia.tipo === '3D') {
+            contenedor3d.classList.remove('hidden');
+
+            enlaceModelo.classList.add('hidden');
+            enlaceModelo.removeAttribute('href');
+
+            const urlLocal = patologia.modeloLocal;
+
+            if (urlLocal) {
+                visorLocal3d.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    visor3d.cargarModelo(urlLocal)
+                        .then(() => {
+                            visorLocal3d.classList.remove('hidden');
+                            iframe3d.classList.add('hidden');
+                        })
+                        .catch((error) => {
+                            visorLocal3d.classList.add('hidden');
+                            console.error('No se pudo cargar el modelo 3D local:', error);
+                        });
+                });
             }
         }
 
-        this.showScreen('screen-model-view');
+        this.mostrarPantalla('screen-model-view');
     },
 
-    getPolycamEmbedUrl(url) {
+    // Convierte URLs de Polycam a formato embebible cuando aplica.
+    obtenerUrlEmbedPolycam(url) {
         if (!url) return '';
-        const cleanUrl = url.trim();
+        const urlLimpia = url.trim();
 
-        if (cleanUrl.includes('poly.cam') && cleanUrl.includes('/explore/capture/')) {
-            const match = cleanUrl.match(/\/explore\/capture\/([a-z0-9-]+)/i);
-            if (match && match[1]) {
-                return `https://poly.cam/capture/${match[1]}?embed=1`;
+        if (urlLimpia.includes('poly.cam') && urlLimpia.includes('/explore/capture/')) {
+            const coincidencia = urlLimpia.match(/\/explore\/capture\/([a-z0-9-]+)/i);
+            if (coincidencia && coincidencia[1]) {
+                return `https://poly.cam/capture/${coincidencia[1]}?embed=1`;
             }
         }
 
-        if (cleanUrl.includes('poly.cam') && cleanUrl.includes('/capture/')) {
-            const embedSuffix = cleanUrl.includes('?') ? '&embed=1' : '?embed=1';
-            return `${cleanUrl}${embedSuffix}`;
+        if (urlLimpia.includes('poly.cam') && urlLimpia.includes('/capture/')) {
+            const sufijoEmbed = urlLimpia.includes('?') ? '&embed=1' : '?embed=1';
+            return `${urlLimpia}${sufijoEmbed}`;
         }
 
-        return cleanUrl;
+        return urlLimpia;
     }
 };
 
+window.museo = museo;
+
+// Inicia la aplicacion cuando el DOM esta listo.
 document.addEventListener('DOMContentLoaded', () => {
-    app.init();
+    museo.iniciar();
 });
