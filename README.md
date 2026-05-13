@@ -10,6 +10,5 @@
 - Abre index.html en tu navegador.
 
 ## Creditos
-- [Al poderoso equipo de desarrollo:
+- Al poderoso equipo de desarrollo:
     --Leonardo Daniel Vargas Calderon (Desarrollador Principal)
-    ]

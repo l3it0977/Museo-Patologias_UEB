@@ -38,13 +38,14 @@ body {
 }
 
 .bg-entrada {
-    background-image: url('../Imágenes/Fondo_Museo.png'); background-color: #111;
+    background-image: url('../Imágenes/fondo_nuevo.jpeg'); background-color: #111;
 }
 
 .bg-sala {
-    background-image: url('../Imágenes/Fondo_Museo.png'); background-color: #222;
+    background-image: url('../Imágenes/fondo_nuevo.jpeg'); background-color: #222;
 }
 
+/* Overlay de difuminado */
 .blur-overlay {
     position: absolute;
     top: 0;
@@ -54,9 +55,10 @@ body {
     background: var(--superposicion-fondo);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    z-index: -1;
+    z-index: -1; 
 }
 
+/* Contenedor principal de la aplicación */
 #app {
     position: relative;
     width: 100vw;
