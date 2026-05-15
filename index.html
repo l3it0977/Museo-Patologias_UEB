@@ -15,6 +15,8 @@
 
     <!-- Contenedor principal de la aplicación -->
     <main id="app">
+        <!-- Logo Global UEB -->
+        <img src="Imágenes/Fondo_UEBCompleto.png" alt="Logo UEB" class="global-logo">
         
         <!-- PANTALLA 1: INICIO -->
         <section id="screen-welcome" class="screen active">
@@ -37,6 +39,7 @@
                 <div class="buttons-container">
                     <button class="btn-secondary" onclick="museo.mostrarListado('3D')">Órganos 3D</button>
                     <button class="btn-secondary" onclick="museo.mostrarListado('2D')">Órganos 2D</button>
+                    <button class="btn-secondary" onclick="museo.mostrarPantalla('screen-chatbot')">Chatbot</button> <!-- TEMPORAL -->
                 </div>
             </div>
         </section>
@@ -115,6 +118,18 @@
                 </div>
             </div>
         </section>
+
+        <!-- TEMPORAL: PANTALLA CHATBOT -->
+        <section id="screen-chatbot" class="screen hidden">
+            <header class="top-bar">
+                <button class="btn-back" onclick="museo.mostrarPantalla('screen-hall')">← Volver a la Sala</button>
+            </header>
+            <div class="content-center">
+                <h1 class="title-main" style="color: var(--color-secundario);">PROXIMAMENTE......</h1>
+                <p class="subtitle" style="font-size: 2rem; font-weight: bold; margin-top: 1rem;">INGENIERO TRABAJANDO......</p>
+            </div>
+        </section>
+        <!-- FIN TEMPORAL -->
 
     </main>
     <script src="js/data.js"></script>

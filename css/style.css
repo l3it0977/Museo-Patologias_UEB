@@ -65,6 +65,17 @@ body {
     height: 100vh;
 }
 
+/* Logo Global */
+.global-logo {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.75rem;
+    height: 48px; /* Ajustado al tamaño de la barra superior */
+    z-index: 1000;
+    pointer-events: none; /* Evita que bloquee clics accidentales debajo */
+}
+
+/* Pantallas */
 .screen {
     position: absolute;
     top: 0;
@@ -79,6 +90,7 @@ body {
     transform: scale(1.05);
 }
 
+/* Pantalla activa */
 .screen.active {
     opacity: 1;
     visibility: visible;
@@ -86,8 +98,10 @@ body {
     z-index: 10;
 }
 
+/* Pantalla oculta (para evitar que interfiera con la activa) */
 .screen.hidden { z-index: 1; }
 
+/* Contenido centrado */
 .content-center {
     margin: auto;
     text-align: center;
@@ -95,6 +109,7 @@ body {
     max-width: 800px;
 }
 
+/* Contenedor general */
 .container {
     flex: 1;
     width: 100%;
@@ -103,19 +118,23 @@ body {
     padding: 2rem;
 }
 
+/* Scroll personalizado para secciones con overflow */
 .overflow-y { overflow-y: auto; }
 .overflow-y::-webkit-scrollbar { width: 8px; }
 .overflow-y::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
 .overflow-y::-webkit-scrollbar-thumb { background: var(--color-secundario); border-radius: 4px; }
 
+/* Tipografía y estilos de texto */
 .title-main { font-size: 4rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 .subtitle { font-size: 1.5rem; font-weight: 300; margin-bottom: 3rem; color: #e0e0e0; }
 .title-section { font-size: 1.7rem; font-weight: 600; }
 
+/* Botones */
 button { font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; outline: none; transition: all 0.3s ease; }
 .btn-primary { background: var(--color-secundario); color: #fff; padding: 1rem 3rem; font-size: 1.2rem; font-weight: 600; border-radius: 50px; box-shadow: 0 4px 15px rgba(177, 18, 58, 0.35); text-transform: uppercase; letter-spacing: 1px; }
 .btn-primary:hover { background: var(--color-secundario-hover); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(177, 18, 58, 0.5); }
 
+/* Contenedor de botones para la pantalla de entrada */
 .buttons-container { display: flex; gap: 2rem; justify-content: center; }
 .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #fff; padding: 1.5rem 4rem; font-size: 1.5rem; border: 2px solid var(--borde-tarjeta); border-radius: 12px; backdrop-filter: blur(5px); }
 .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); border-color: var(--color-secundario); transform: translateY(-5px); }
@@ -123,23 +142,28 @@ button { font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; o
 .btn-back:hover { color: #fff; }
 .btn-large { width: 100%; margin-top: 2rem; }
 
-.top-bar { display: flex; align-items: center; padding: 1.25rem 1.75rem; background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-.top-bar .title-section { margin-left: 1.25rem; }
+/* Barra superior */
+.top-bar { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 1.25rem 5rem 1.25rem 1.75rem; background: rgba(0, 0, 0, 0.3); border-bottom: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+.top-bar .title-section { margin-left: 0; }
 
+/* Tarjetas y diseño de cuadrícula */
 .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
 .card { background: var(--fondo-tarjeta); border: 1px solid var(--borde-tarjeta); border-radius: 12px; padding: 2rem; text-align: center; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; min-height: 200px; }
 .card:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--color-secundario); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 .card h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
 .card .tag { display: inline-block; background: var(--color-secundario); color: white; font-size: 0.8rem; padding: 0.2rem 0.8rem; border-radius: 12px; margin-bottom: 1rem; }
 
+/* Detalles del modelo */
 .wrapper-detail { display: flex; justify-content: center; align-items: flex-start; }
 .info-card { background: var(--fondo-tarjeta); border: 1px solid var(--borde-tarjeta); border-radius: 12px; padding: 3rem; width: 100%; max-width: 900px; backdrop-filter: blur(10px); }
 .info-section { margin-bottom: 2rem; }
 .info-section h3 { color: var(--color-secundario); margin-bottom: 1rem; font-size: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
 .info-section p { line-height: 1.7; color: #e2e8f0; font-weight: 300; }
 
+/* Estilos para campos editables */
 .editable-placeholder { font-style: italic; opacity: 0.8; }
 
+/* Visores 2D y 3D */
 .model-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2rem; align-items: start; height: auto; }
 .viewer-container { background: rgba(0, 0, 0, 0.5); border-radius: 12px; border: 1px solid var(--borde-tarjeta); display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
 #viewer-2d, #viewer-3d { width: 100%; height: 100%; }
@@ -154,6 +178,7 @@ button { font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; o
 .screen.scrollable { overflow-y: auto; }
 .hidden { display: none !important; }
 
+/* Animaciones */
 @media (max-width: 900px) {
     .model-layout { grid-template-columns: 1fr; grid-template-rows: auto auto; }
     .viewer-container { height: 50vh; min-height: 320px; }
@@ -162,16 +187,22 @@ button { font-family: 'Montserrat', sans-serif; cursor: pointer; border: none; o
     .btn-secondary { width: 100%; }
 }
 
+/* Estilos para dispositivos móviles */
 @media (max-width: 600px) {
+    .global-logo {
+        top: 1rem;
+        right: 1.25rem;
+        height: 35px;
+    }
     .content-center { padding: 1.5rem; }
     .title-main { font-size: 2.1rem; }
     .subtitle { font-size: 1.1rem; margin-bottom: 2rem; }
     .btn-primary { padding: 0.85rem 2rem; font-size: 1rem; }
     .btn-secondary { padding: 1rem 1.5rem; font-size: 1.1rem; }
-    .top-bar { padding: 1rem 1.25rem; flex-wrap: wrap; gap: 0.5rem; }
-    .top-bar .title-section { margin-left: 0; font-size: 1.35rem; }
+    .top-bar { padding: 1rem 4rem 1rem 1.25rem; }
+    .top-bar .title-section { font-size: 1.35rem; }
     .grid-cards { grid-template-columns: 1fr; gap: 1.25rem; }
     .card { min-height: 160px; padding: 1.5rem; }
     .info-card { padding: 2rem; }
-    .container { padding: 1.25rem; }
+    .container { padding: 1.25rem; padding-bottom: 6rem; }
 }
