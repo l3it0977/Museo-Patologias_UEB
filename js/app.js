@@ -182,6 +182,7 @@ const visor3d = (() => {
 
 const museo = {
     patologiaActual: null,
+    screenTimers: new Map(),
 
     // Inicializa eventos y la transicion inicial del museo.
     iniciar() {
@@ -195,16 +196,32 @@ const museo = {
 
     // Cambia la pantalla activa con transicion suave.
     mostrarPantalla(idPantalla) {
+        const destino = document.getElementById(idPantalla);
+        if (!destino) return;
+
         document.querySelectorAll('.screen').forEach((pantalla) => {
+            const timerPrevio = this.screenTimers.get(pantalla.id);
+            if (timerPrevio) {
+                clearTimeout(timerPrevio);
+                this.screenTimers.delete(pantalla.id);
+            }
+
             if (pantalla.id !== idPantalla) {
                 pantalla.classList.remove('active');
-                setTimeout(() => pantalla.classList.add('hidden'), 500);
+                const timerOcultar = setTimeout(() => {
+                    pantalla.classList.add('hidden');
+                    this.screenTimers.delete(pantalla.id);
+                }, 500);
+                this.screenTimers.set(pantalla.id, timerOcultar);
             }
         });
 
-        const destino = document.getElementById(idPantalla);
         destino.classList.remove('hidden');
-        setTimeout(() => destino.classList.add('active'), 50);
+        const timerMostrar = setTimeout(() => {
+            destino.classList.add('active');
+            this.screenTimers.delete(destino.id);
+        }, 50);
+        this.screenTimers.set(destino.id, timerMostrar);
     },
 
     // Genera el listado de patologias segun el tipo seleccionado.
@@ -265,6 +282,7 @@ const museo = {
         const visor2d = document.getElementById('viewer-2d');
         const contenedor3d = document.getElementById('viewer-3d');
         const enlaceModelo = document.getElementById('model-external-link');
+        const enlace2d = document.getElementById('image-2d-link');
         const iframe3d = document.getElementById('iframe-3d');
         const visorLocal3d = document.getElementById('visor-3d-local');
 
@@ -273,11 +291,17 @@ const museo = {
         visorLocal3d.classList.add('hidden');
         iframe3d.classList.add('hidden');
         iframe3d.src = '';
+        enlace2d.classList.add('hidden');
+        enlace2d.removeAttribute('href');
 
         if (patologia.tipo === '2D') {
             visor2d.classList.remove('hidden');
             const imagen = document.getElementById('image-2d');
             imagen.src = patologia.imagen2d ? encodeURI(patologia.imagen2d) : '';
+            if (patologia.enlace2d) {
+                enlace2d.href = patologia.enlace2d;
+                enlace2d.classList.remove('hidden');
+            }
             enlaceModelo.classList.add('hidden');
             enlaceModelo.removeAttribute('href');
         } else if (patologia.tipo === '3D') {

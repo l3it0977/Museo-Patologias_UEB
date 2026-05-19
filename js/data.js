@@ -114,6 +114,7 @@ const datosPatologias = [
         macro: 'Pulmón duro y retraído con aspecto en “panal de abeja” en estadios avanzados.',
         micro: 'Engrosamiento de tabiques alveolares; fibrosis intersticial difusa; destrucción de la arquitectura pulmonar.',
         imagen2d: 'Imágenes/2D/Fribrosis Pulmonar.jpeg',
+        enlace2d: 'https://share.google/Vg1yT78t78EjOnVzg',
     },
     {
         identificador: 'hipertrofia_cardiaca',
@@ -126,6 +127,7 @@ const datosPatologias = [
         macro: 'Engrosamiento de la pared ventricular, especialmente del ventrículo izquierdo; aumento del tamaño cardíaco.',
         micro: 'Miocitos aumentados de tamaño; núcleos grandes en “caja”; fibrosis intersticial variable.',
         imagen2d: 'Imágenes/2D/Hipertrofia Cardíaca.jpeg',
+        enlace2d: 'https://share.google/hfb2Y79yiwqtq5mOA',
     },
     {
         identificador: 'tumor_cerebral',
@@ -138,6 +140,7 @@ const datosPatologias = [
         macro: 'Masa cerebral irregular con áreas de necrosis y hemorragia; infiltración local del tejido cerebral.',
         micro: 'Células muy atípicas con pleomorfismo; necrosis con patrón en empalizada; alta actividad mitótica.',
         imagen2d: 'Imágenes/2D/Tumor Cerebral.jpeg',
+        enlace2d: 'https://share.google/DHTt69oeBDJqPfkO8',
     },
     {
         identificador: 'embolia_pulmonar',
@@ -150,6 +153,7 @@ const datosPatologias = [
         macro: 'Zona triangular hemorrágica o infarto pulmonar en el territorio irrigado por la arteria ocluida.',
         micro: 'Trombo o coágulo dentro del vaso pulmonar; necrosis y hemorragia del tejido pulmonar adyacente.',
         imagen2d: 'Imágenes/2D/Embolia Pulmonar .jpeg',
+        enlace2d: 'https://share.google/eJcZ0gK3svDd4f9Ou',
     },
     {
         identificador: 'aterosclerosis',
@@ -162,6 +166,7 @@ const datosPatologias = [
         macro: 'Arterias endurecidas y estrechas con placas visibles en la luz arterial.',
         micro: 'Placas lipídicas con macrófagos cargados de lípidos (células espumosas) y fibrosis en la íntima arterial.',
         imagen2d: 'Imágenes/2D/Ateroesclerosis.jpeg',
+        enlace2d: 'https://share.google/iyYwZI6zCyTkoGP3k',
     },
     {
         identificador: 'hemorragia_cerebral',
@@ -174,6 +179,7 @@ const datosPatologias = [
         macro: 'Acumulación de sangre en el parénquima cerebral con efecto de masa y desplazamiento de estructuras.',
         micro: 'Sangre fuera de los vasos; daño neuronal y edema circundante.',
         imagen2d: 'Imágenes/2D/Hemorragia Cerebral.jpeg',
+        enlace2d: 'https://share.google/UALx9RpxMjLiA3HRy',
     },
     {
         identificador: 'neumotorax',
@@ -186,6 +192,7 @@ const datosPatologias = [
         macro: 'Pulmón colapsado con aire en la cavidad pleural; posible desplazamiento mediastínico si es a tensión.',
         micro: 'Colapso alveolar y pérdida de expansión pulmonar en la zona afectada.',
         imagen2d: 'Imágenes/2D/Neumotorax.jpeg',
+        enlace2d: 'https://share.google/ILMa1I5rjznWHTxrU',
     },
     {
         identificador: 'insuficiencia_cardiaca',
@@ -198,6 +205,7 @@ const datosPatologias = [
         macro: 'Corazón dilatado con posible hipertrofia y cambios estructurales según la etiología.',
         micro: 'Fibrosis intersticial; degeneración de miocitos; cambios celulares asociados a sobrecarga crónica.',
         imagen2d: 'Imágenes/2D/Insuficiencia Cardiaca.jpeg',
+        enlace2d: 'https://share.google/zxxdjxCmF4LrHwUAS',
     }, 
     {
         identificador: 'cirrosis_hepatica',
@@ -210,6 +218,7 @@ const datosPatologias = [
         macro: 'Hígado nodular y duro con superficie irregular y reducción del volumen funcional.',
         micro: 'Fibrosis difusa con nódulos regenerativos y alteración de la arquitectura hepática normal.',
         imagen2d: 'Imágenes/2D/Cirrosis Hepática.jpeg',
+        enlace2d: 'https://share.google/3j2P5Mw9E91FJB0Bh',
     },
     {
         identificador: 'osteosarcoma',
@@ -222,6 +231,7 @@ const datosPatologias = [
         macro: 'Lesión ósea destructiva que puede producir masa blanda adyacente y destrucción cortical.',
         micro: 'Células malignas pleomórficas que producen osteoide; alta actividad mitótica.',
         imagen2d: 'Imágenes/2D/Osteosarcoma.jpeg',
+        enlace2d: 'https://share.google/ct8f31c4vc1dq3iLB',
     }
 ];
 

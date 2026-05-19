@@ -1,0 +1,11 @@
+## Enlaces de las imagenes 
+- Fibrosis pulmonar: https://share.google/Vg1yT78t78EjOnVzg
+- Hipertrofia Cardiaca: https://share.google/hfb2Y79yiwqtq5mOA
+- Tumor cerebral: https://share.google/DHTt69oeBDJqPfkO8
+- Embolia pulmonar: https://share.google/eJcZ0gK3svDd4f9Ou
+- Aterosclerosis: https://share.google/iyYwZI6zCyTkoGP3k
+- Hemorragia cerebral: https://share.google/UALx9RpxMjLiA3HRy
+- Neumotórax: https://share.google/ILMa1I5rjznWHTxrU
+- Insuficiencia cardiaca: https://share.google/zxxdjxCmF4LrHwUAS
+- Cirrosis hepática: https://share.google/3j2P5Mw9E91FJB0Bh
+- Osteosarcoma: https://share.google/ct8f31c4vc1dq3iLB
