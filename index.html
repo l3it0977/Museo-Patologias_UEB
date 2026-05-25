@@ -77,16 +77,19 @@
                         <h3>Características Principales</h3>
                         <p id="detail-characteristics" class="editable-placeholder"></p>
                     </div>
-                    
+
                     <div class="action-container">
                         <button id="btn-view-model" class="btn-primary btn-large">Ver Modelo</button>
                     </div>
                 </div>
             </div>
+            <button class="btn-chat-float" onclick="museo.mostrarPantalla('screen-chatbot')" title="Consultar al asistente">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </button>
         </section>
 
         <!-- PANTALLA 5: VISUALIZACIÓN DEL MODELO -->
-        <section id="screen-model-view" class="screen hidden scrollable">
+        <section id="screen-model-view" class="screen hidden">
             <header class="top-bar">
                 <button class="btn-back" onclick="museo.mostrarPantalla('screen-detail')">← Volver a Información</button>
                 <h2 id="model-view-title" class="title-section">Modelo de la Patología</h2>
@@ -105,7 +108,7 @@
                     </div>
                     <a id="model-external-link" class="btn-secondary model-link hidden" target="_blank" rel="noopener">Abrir modelo 3D en otra pestaña</a>
                 </div>
-                
+
                 <!-- Columna Derecha: Información Macro/Micro -->
                 <div class="model-info-sidebar">
                     <div class="info-section highlight">
@@ -118,21 +121,57 @@
                     </div>
                 </div>
             </div>
+            <button class="btn-chat-float" onclick="museo.mostrarPantalla('screen-chatbot')" title="Consultar al asistente">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </button>
         </section>
 
-        <!-- TEMPORAL: PANTALLA CHATBOT -->
+        <!-- PANTALLA CHATBOT -->
         <section id="screen-chatbot" class="screen hidden">
-            <header class="top-bar">
+            <header class="top-bar chatbot-topbar">
                 <button class="btn-back" onclick="museo.mostrarPantalla('screen-hall')">← Volver a la Sala</button>
+                <div class="chatbot-header">
+                    <h2 class="title-section">Asistente de Patologías</h2>
+                    <div class="chatbot-status" id="chat-status">
+                        <span class="status-dot"></span>
+                        <span id="chat-status-text">Listo para responder</span>
+                    </div>
+                </div>
             </header>
-            <div class="content-center">
-                <h1 class="title-main" style="color: var(--color-secundario);">PROXIMAMENTE......</h1>
-                <p class="subtitle" style="font-size: 2rem; font-weight: bold; margin-top: 1rem;">INGENIERO TRABAJANDO......</p>
+            <div class="container chatbot-shell">
+                <aside class="chatbot-info">
+                    <div class="chatbot-info-card">
+                        <h3>Guía rápida</h3>
+                        <ul>
+                            <li>Pregunta sobre una patología específica.</li>
+                            <li>Pide definiciones, causas o hallazgos macro/micro.</li>
+                            <li>Escribe con claridad para respuestas más precisas.</li>
+                        </ul>
+                    </div>
+                    <div class="chatbot-info-card highlight">
+                        <h3>Fuentes del museo</h3>
+                        <p>Las respuestas se basan únicamente en el documento de patologías cargado.</p>
+                    </div>
+                    <button id="chat-new" class="btn-secondary btn-chat-reset">Nueva conversación</button>
+                </aside>
+                <section class="chatbot-panel">
+                    <div id="chat-messages" class="chatbot-messages"></div>
+                    <form id="chat-form" class="chatbot-input-area" autocomplete="off">
+                        <label class="sr-only" for="chat-input">Escribe tu pregunta</label>
+                        <textarea id="chat-input" rows="2" placeholder="Escribe tu pregunta sobre una patología..."></textarea>
+                        <div class="chatbot-actions">
+                            <span class="chatbot-hint">Shift + Enter para salto de línea</span>
+                            <button id="chat-send" type="submit" class="btn-primary">Enviar</button>
+                        </div>
+                    </form>
+                </section>
             </div>
         </section>
-        <!-- FIN TEMPORAL -->
+        <!-- FIN CHATBOT -->
 
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/chatbot.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>

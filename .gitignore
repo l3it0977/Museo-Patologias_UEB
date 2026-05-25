@@ -1,0 +1,32 @@
+# IDE y editores
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+*.local
+.env.keys
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Herramientas y outputs generados
+repomix-output.xml
+*.log
+npm-debug.log*
+
+# Dependencias
+node_modules/
+dist/
+.cache/
+.parcel-cache/
+
+# Supabase (el .gitignore dentro de /supabase maneja .temp y .branches)
+supabase/.temp/
+supabase/.branches/
