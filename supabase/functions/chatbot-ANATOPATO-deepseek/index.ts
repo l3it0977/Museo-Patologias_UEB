@@ -17,10 +17,8 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const OPENROUTER_API_KEY = Deno.env.get("OPENROUTER_API_KEY");
-const OPENROUTER_MODEL = Deno.env.get("OPENROUTER_MODEL") ?? "openai/gpt-oss-120b:free";
-const OPENROUTER_SITE_URL = Deno.env.get("OPENROUTER_SITE_URL") ?? "https://museo-patologias.local";
-const OPENROUTER_APP_NAME = Deno.env.get("OPENROUTER_APP_NAME") ?? "Museo de Patologias";
+const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+const GROQ_MODEL = Deno.env.get("GROQ_MODEL") ?? "llama-3.3-70b-versatile";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error("Faltan SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY en el entorno.");
@@ -58,8 +56,8 @@ serve(async (req: Request) => {
   }
 
   try {
-    if (!OPENROUTER_API_KEY) {
-      return jsonResponse({ error: "Falta OPENROUTER_API_KEY en el entorno." }, 500);
+    if (!GROQ_API_KEY) {
+      return jsonResponse({ error: "Falta GROQ_API_KEY en el entorno." }, 500);
     }
 
     const { session_id, contenido, conversation_id } = await req.json();
@@ -122,8 +120,14 @@ serve(async (req: Request) => {
       .order("fecha_creacion", { ascending: true });
 
     if (errorDocs) {
+      console.error("[chatbot] errorDocs:", errorDocs);
       throw new Error("No se pudo leer el documento de patologias.");
     }
+
+    console.log(`[chatbot] Documentos recuperados: ${documentos?.length ?? 0}`);
+    console.log(`[chatbot] Primeros titulos: ${(documentos ?? []).slice(0, 5).map((d: DocumentoPatologia) => d.titulo).join(" | ")}`);
+    console.log(`[chatbot] Modelo en uso: ${GROQ_MODEL}`);
+    console.log(`[chatbot] Pregunta del usuario: ${contenido}`);
 
     const contexto = (documentos ?? [])
       .map(
@@ -131,6 +135,8 @@ serve(async (req: Request) => {
           `Documento ${index + 1}: ${doc.titulo}\n${doc.contenido}`
       )
       .join("\n\n---\n\n");
+
+    console.log(`[chatbot] Longitud del contexto: ${contexto.length} caracteres`);
 
     const { data: historial, error: errorHistorial } = await supabase
       .from("mensaje")
@@ -143,50 +149,49 @@ serve(async (req: Request) => {
       throw new Error("No se pudo obtener el historial de conversacion.");
     }
 
+    const systemPrompt =
+      "Eres una guía virtual del Museo Universitario de Anatomía Patológica. Tu trabajo es explicar a los visitantes (estudiantes de medicina) las patologías descritas en los DOCUMENTOS DEL MUSEO que aparecen al final de este mensaje.\n\n" +
+      "CÓMO RESPONDER:\n" +
+      "- Cuando el visitante mencione una patología, IDENTIFICALA en los documentos. La búsqueda es FLEXIBLE: ignora tildes, mayúsculas y diferencias menores (ej: 'colon chagasico' coincide con 'Colon chagásico', 'leiomioma' coincide con 'Leiomioma uterino').\n" +
+      "- Una vez identificada, responde con la información del documento correspondiente: definición, causa, características, hallazgos macroscópicos y microscópicos. Explica de forma clara y didáctica.\n" +
+      "- Si la patología NO está en ninguno de los documentos, responde: 'Esa patología no está incluida en el museo. Las disponibles son:' y lista los títulos.\n" +
+      "- Si la pregunta no tiene nada que ver con patologías (clima, deportes, etc.), responde brevemente que solo puedes hablar sobre las patologías del museo.\n" +
+      "- NUNCA repitas la lista completa de patologías si el visitante ya nombró una específica que SÍ está en los documentos — en ese caso, explícala directamente.\n\n" +
+      "DOCUMENTOS DEL MUSEO:\n" +
+      (contexto || "No hay documentos cargados en el museo.");
+
     const mensajes = [
-      {
-        role: "system",
-        content:
-          "Eres el asistente virtual del Museo de Anatomía Patológica. " +
-          "Tu ÚNICA fuente de información son los documentos del museo proporcionados al final de este mensaje. " +
-          "REGLAS ESTRICTAS:\n" +
-          "1. Responde EXCLUSIVAMENTE con información que esté textualmente en los documentos.\n" +
-          "2. PROHIBIDO usar conocimiento de tu entrenamiento, internet o fuentes externas.\n" +
-          "3. Si la información solicitada NO está en los documentos, responde exactamente: 'No tengo información sobre ese tema en los documentos del museo.'\n" +
-          "4. No improvises, no supongas, no complementes con conocimiento propio.\n" +
-          "5. Si la pregunta no está relacionada con patología o con el contenido de los documentos, indica que solo puedes responder sobre las patologías del museo.\n\n" +
-          "DOCUMENTOS DEL MUSEO:\n" +
-          (contexto || "No hay documentos cargados en el museo."),
-      },
+      { role: "system", content: systemPrompt },
       ...((historial ?? []).map((msg: MensajeHistorial) => ({
         role: msg.es_usuario ? "user" : "assistant",
         content: msg.contenido,
       }))),
     ];
 
-    const respuestaOpenRouter = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const respuestaGroq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": OPENROUTER_SITE_URL,
-        "X-Title": OPENROUTER_APP_NAME,
+        Authorization: `Bearer ${GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: OPENROUTER_MODEL,
+        model: GROQ_MODEL,
         messages: mensajes,
         temperature: 0.2,
         max_tokens: 800,
       }),
     });
 
-    if (!respuestaOpenRouter.ok) {
-      const errorTexto = await respuestaOpenRouter.text();
-      throw new Error(`OpenRouter fallo: ${errorTexto}`);
+    if (!respuestaGroq.ok) {
+      const errorTexto = await respuestaGroq.text();
+      throw new Error(`Groq fallo: ${errorTexto}`);
     }
 
-    const dataOpenRouter = await respuestaOpenRouter.json();
-    const respuestaAsistente = dataOpenRouter?.choices?.[0]?.message?.content?.trim();
+    const dataGroq = await respuestaGroq.json();
+    console.log("[chatbot] Respuesta Groq completa:", JSON.stringify(dataGroq));
+    console.log("[chatbot] finish_reason:", dataGroq?.choices?.[0]?.finish_reason);
+
+    const respuestaAsistente = dataGroq?.choices?.[0]?.message?.content?.trim();
 
     if (!respuestaAsistente) {
       throw new Error("La respuesta del asistente llego vacia.");

@@ -17,9 +17,18 @@ Thumbs.db
 desktop.ini
 
 # Herramientas y outputs generados
-repomix-output.xml
+repomix-output.*
 *.log
 npm-debug.log*
+
+# Documentación de herramientas/skills (no forma parte del sitio web)
+ui-ux-promax.md
+
+# Respaldos, temporales e historial del editor
+*.tmp
+*.bak
+*~
+.history/
 
 # Dependencias
 node_modules/

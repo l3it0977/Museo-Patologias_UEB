@@ -6,3 +6,7 @@
 .env.keys
 .env.local
 .env.*.local
+
+# Otros
+# Los ignores de todo el proyecto (repomix-output.*, ui-ux-promax.md, etc.) están en el
+# .gitignore de la raíz; este archivo solo aplica a la carpeta /supabase.

@@ -94,6 +94,8 @@
     }
 
     function startNewConversation() {
+        state.sessionId = generateSessionId();
+        localStorage.setItem("museo.sessionId", state.sessionId);
         saveConversationId("");
         clearMessages();
         addMessage(
@@ -114,6 +116,9 @@
         const typingBubble = addTyping();
 
         try {
+            console.log("[Chatbot] Enviando a:", FUNCTION_URL);
+            console.log("[Chatbot] Body:", { session_id: state.sessionId, conversation_id: state.conversationId || null, contenido: text.trim() });
+
             const response = await fetch(FUNCTION_URL, {
                 method: "POST",
                 headers: {
@@ -128,9 +133,13 @@
                 })
             });
 
+            console.log("[Chatbot] HTTP status:", response.status, response.statusText);
+
             const data = await response.json();
+            console.log("[Chatbot] Respuesta del servidor:", data);
+
             if (!response.ok) {
-                throw new Error(data?.error || "No se pudo obtener respuesta.");
+                throw new Error(data?.error || `HTTP ${response.status}: No se pudo obtener respuesta.`);
             }
 
             if (data?.conversation_id) {
@@ -144,6 +153,7 @@
                 addMessage("assistant", respuesta);
                 setStatus("Respuesta lista", "ok");
             } else {
+                console.warn("[Chatbot] Respuesta vacia. Data completa:", data);
                 addMessage(
                     "assistant",
                     "No se encontro informacion suficiente en el documento de patologias."
@@ -152,12 +162,12 @@
             }
         } catch (error) {
             typingBubble.remove();
+            console.error("[Chatbot] Error completo:", error);
             addMessage(
                 "assistant",
-                "Lo siento, hubo un problema al consultar el asistente. Intentalo de nuevo."
+                `Error: ${error.message || "Problema al consultar el asistente. Intentalo de nuevo."}`
             );
             setStatus("Error al responder", "error");
-            console.error(error);
         } finally {
             state.isSending = false;
             setInputDisabled(false);
